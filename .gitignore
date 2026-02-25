@@ -1,0 +1,33 @@
+# Environment files (secrets!)
+.env
+.env.local
+.env.*.local
+
+# Google credentials
+*.credentials.json
+google-*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.Python
+
+# Node
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vault sessions (private)
+vault/.sessions/

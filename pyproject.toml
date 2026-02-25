@@ -1,0 +1,30 @@
+[project]
+name = "content-bot"
+version = "1.0.0"
+description = "Telegram bot that extracts content ideas from meeting transcripts and voice notes"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiogram>=3.0",
+    "deepgram-sdk",
+    "httpx",
+    "pydantic>=2.0",
+    "pydantic-settings",
+    "google-api-python-client>=2.0",
+    "google-auth>=2.0",
+    "python-docx>=1.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "content_bot"
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
