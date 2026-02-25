@@ -31,3 +31,8 @@ Thumbs.db
 
 # Vault sessions (private)
 vault/.sessions/
+
+# Personal content strategy files (use .template versions)
+vault/.claude/skills/*/references/tone-of-voice.md
+vault/.claude/skills/*/references/tone-examples.md
+vault/.claude/skills/*/references/icp.md
