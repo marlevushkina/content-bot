@@ -125,12 +125,16 @@ def format_process_report(report: dict[str, Any]) -> str:
 
 
 def split_html_report(text: str, max_length: int = 4000) -> list[str]:
-    """Split long HTML report into parts by Seed boundaries."""
+    """Split long HTML report into parts by Seed boundaries.
+
+    Supports both HTML (<b>Seed #) and markdown (**Seed #) markers.
+    """
     if len(text) <= max_length:
         return [text]
 
     parts: list[str] = []
-    chunks = re.split(r"(?=<b>Seed #)", text)
+    # Split on both <b>Seed # and **Seed # markers
+    chunks = re.split(r"(?=(?:<b>|\*\*)Seed #)", text)
 
     current = ""
     for chunk in chunks:
