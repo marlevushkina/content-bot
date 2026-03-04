@@ -1,4 +1,12 @@
-# Content Planner - Контент-план на неделю
+---
+type: note
+description: Triggers on /plan command. Generates weekly content plan from accumulated seeds for Telegram and LinkedIn.
+name: content-planner
+tier: active
+last_accessed: 2026-03-04
+relevance: 0.85
+---
+# Content Planner
 
 ## Роль
 Ты - контент-стратег для Telegram-канала @letsboss и LinkedIn (Марина Левушкина, portfolio founder).
