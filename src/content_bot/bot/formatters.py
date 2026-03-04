@@ -191,10 +191,13 @@ def format_error(error: str) -> str:
 
 
 def split_html_report(text: str, max_length: int = 4000) -> list[str]:
-    """Split long HTML report into parts by Seed boundaries.
+    """Split long HTML report into parts by natural boundaries.
 
-    Splits on '<b>Seed #' or '**Seed #' markers to keep each seed intact.
-    Falls back to truncate_html if no seed markers found.
+    Tries multiple splitting strategies:
+    1. By Seed markers (for content-seeds): '<b>Seed #' or '**Seed #'
+    2. By week days (for content-plan): '<b>Пн:</b>', '<b>Вт:</b>', etc.
+    3. By major sections: '<b>TELEGRAM:</b>', '<b>LINKEDIN', '<b>📊 Итого'
+    4. Falls back to truncate_html if no markers found.
 
     Args:
         text: Full HTML report text or markdown.
@@ -206,11 +209,34 @@ def split_html_report(text: str, max_length: int = 4000) -> list[str]:
     if len(text) <= max_length:
         return [text]
 
-    # Try to split by seed boundaries
-    import re
     parts: list[str] = []
-    # Split before each <b>Seed # or **Seed # marker (keep the marker with the next chunk)
-    chunks = re.split(r"(?=(?:<b>|\*\*)Seed #)", text)
+
+    # Strategy 1: Try splitting by Seed markers (for content-seeds)
+    if "Seed #" in text:
+        chunks = re.split(r"(?=(?:<b>|\*\*)Seed #)", text)
+    # Strategy 2: Try splitting by weekdays (for content-plan)
+    elif re.search(r"<b>(Пн|Вт|Ср|Чт|Пт|Сб|Вс):", text):
+        # Split before each weekday, but keep header intact
+        # First, extract header (everything before first weekday)
+        match = re.search(r"(<b>(?:Пн|Вт|Ср|Чт|Пт|Сб|Вс):)", text)
+        if match:
+            header = text[:match.start()]
+            body = text[match.start():]
+            # Split body by weekdays
+            day_chunks = re.split(r"(?=<b>(?:Пн|Вт|Ср|Чт|Пт|Сб|Вс):)", body)
+            # Combine header with first chunk
+            if day_chunks:
+                chunks = [header + day_chunks[0]] + day_chunks[1:]
+            else:
+                chunks = [text]
+        else:
+            chunks = [text]
+    # Strategy 3: Split by major sections
+    elif "<b>TELEGRAM:</b>" in text or "<b>LINKEDIN" in text:
+        chunks = re.split(r"(?=<b>(?:TELEGRAM|LINKEDIN|📊 Итого))", text)
+    else:
+        # No good split points, fall back to truncation
+        return [truncate_html(text, max_length)]
 
     current = ""
     for chunk in chunks:
@@ -226,7 +252,7 @@ def split_html_report(text: str, max_length: int = 4000) -> list[str]:
     if current:
         parts.append(current.strip())
 
-    # If splitting didn't help (no seed markers), fall back to truncation
+    # If splitting didn't help, fall back to truncation
     if not parts:
         return [truncate_html(text, max_length)]
 
