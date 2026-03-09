@@ -172,8 +172,8 @@ def format_process_report(report: dict[str, Any]) -> str:
             # Fall back to plain text if tags are broken
             return html.escape(raw_report)
 
-        # Truncate if too long
-        return truncate_html(sanitized, max_length=4096)
+        # Return full text — caller must use split_html_report() for long messages
+        return sanitized
 
     return "✅ <b>Обработка завершена</b>"
 
@@ -214,26 +214,40 @@ def split_html_report(text: str, max_length: int = 4000) -> list[str]:
     # Strategy 1: Try splitting by Seed markers (for content-seeds)
     if "Seed #" in text:
         chunks = re.split(r"(?=(?:<b>|\*\*)Seed #)", text)
-    # Strategy 2: Try splitting by weekdays (for content-plan)
+    # Strategy 2: Content plan posts: **Пост N — or <b>Пост N
+    elif re.search(r"(?:\*\*|<b>)Пост\s+\d+", text):
+        chunks = re.split(r"(?=(?:\*\*|<b>)Пост\s+\d+)", text)
+    # Strategy 3: Try splitting by weekdays (for content-plan)
     elif re.search(r"<b>(Пн|Вт|Ср|Чт|Пт|Сб|Вс):", text):
-        # Split before each weekday, but keep header intact
-        # First, extract header (everything before first weekday)
         match = re.search(r"(<b>(?:Пн|Вт|Ср|Чт|Пт|Сб|Вс):)", text)
         if match:
             header = text[:match.start()]
             body = text[match.start():]
-            # Split body by weekdays
             day_chunks = re.split(r"(?=<b>(?:Пн|Вт|Ср|Чт|Пт|Сб|Вс):)", body)
-            # Combine header with first chunk
-            if day_chunks:
-                chunks = [header + day_chunks[0]] + day_chunks[1:]
-            else:
-                chunks = [text]
+            chunks = [header + day_chunks[0]] + day_chunks[1:] if day_chunks else [text]
         else:
             chunks = [text]
-    # Strategy 3: Split by major sections
+    # Strategy 4: Split by major sections
     elif "<b>TELEGRAM:</b>" in text or "<b>LINKEDIN" in text:
         chunks = re.split(r"(?=<b>(?:TELEGRAM|LINKEDIN|📊 Итого))", text)
+    # Strategy 5: Morning review sections (by emoji markers)
+    elif re.search(r"<b>[⏰📅🗓☀️]", text):
+        chunks = re.split(r"(?=<b>[⏰📅🗓☀️])", text)
+    # Strategy 6: Split by double newlines (universal fallback)
+    elif "\n\n" in text:
+        paragraphs = text.split("\n\n")
+        chunks = []
+        current = ""
+        for para in paragraphs:
+            if len(current) + len(para) + 2 <= max_length:
+                current = current + "\n\n" + para if current else para
+            else:
+                if current:
+                    chunks.append(current)
+                current = para
+        if current:
+            chunks.append(current)
+        return [c for c in chunks if c.strip()] or [truncate_html(text, max_length)]
     else:
         # No good split points, fall back to truncation
         return [truncate_html(text, max_length)]
