@@ -1,0 +1,44 @@
+# Environment files (secrets!)
+.env
+.env.local
+.env.*.local
+
+# Credentials
+*.credentials.json
+google-*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.Python
+
+# Node
+node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# ─── Generated runtime content (your own data — should not be committed) ──────
+# Reference templates ARE shipped; these are the files the bot writes/you fill.
+vault/content/seeds/seeds.md
+vault/content/seeds/ideas.md
+vault/content/seeds/.dismissed.json
+vault/content/plans/
+vault/content/meetings/
+vault/content/strategy-notes.md
+vault/content/channel-archive/
+vault/daily/*
+vault/thoughts/**/*
+vault/goals/*
+!**/.gitkeep

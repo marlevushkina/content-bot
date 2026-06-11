@@ -1,0 +1,17 @@
+[Unit]
+Description=Content Bot (Telegram)
+After=network.target
+
+[Service]
+Type=simple
+# Edit these to match your server:
+User=<YOUR_USER>
+WorkingDirectory=/home/<YOUR_USER>/content-bot
+ExecStart=/usr/local/bin/uv run python -m content_bot
+EnvironmentFile=/home/<YOUR_USER>/content-bot/.env
+Environment=PYTHONUNBUFFERED=1
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

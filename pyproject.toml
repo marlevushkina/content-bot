@@ -1,0 +1,36 @@
+[project]
+name = "content-bot"
+version = "1.0.0"
+description = "Telegram bot for content generation — seeds, plans, post writing"
+requires-python = ">=3.12"
+dependencies = [
+    "aiogram>=3.0",
+    "anthropic>=0.40",
+    "httpx",
+    "pydantic>=2.0",
+    "pydantic-settings",
+    "deepgram-sdk>=3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.7,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "content_bot"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
