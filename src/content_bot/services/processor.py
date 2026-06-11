@@ -886,14 +886,39 @@ CRITICAL:
         return self.vault_path / "content" / "seeds" / ".dismissed.json"
 
     def _load_dismissed(self) -> list[dict]:
+        """Load dismissed seeds, normalizing legacy formats to list[{week,num}].
+
+        Accepts: list[{"week","num"}] (current), {"dismissed": [...]} and bare
+        lists of "week:num" strings (legacy).
+        """
         import json
         path = self._dismissed_path()
-        if path.exists():
-            try:
-                return json.loads(path.read_text())
-            except Exception:
-                return []
-        return []
+        if not path.exists():
+            return []
+        try:
+            data = json.loads(path.read_text())
+        except Exception:
+            return []
+
+        if isinstance(data, dict):
+            data = data.get("dismissed", [])
+        if not isinstance(data, list):
+            return []
+
+        result: list[dict] = []
+        for item in data:
+            if isinstance(item, dict) and "week" in item and "num" in item:
+                try:
+                    result.append({"week": item["week"], "num": int(item["num"])})
+                except (TypeError, ValueError):
+                    continue
+            elif isinstance(item, str) and ":" in item:
+                week, _, num = item.rpartition(":")
+                try:
+                    result.append({"week": week, "num": int(num)})
+                except ValueError:
+                    continue
+        return result
 
     def _save_dismissed(self, dismissed: list[dict]) -> None:
         import json
